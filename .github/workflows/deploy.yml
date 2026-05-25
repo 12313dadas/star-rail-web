@@ -1,0 +1,34 @@
+# Git push 到 main 分支后自动部署到服务器
+# 在 GitHub 仓库 Settings → Secrets 中添加:
+#   DEPLOY_HOST     = 47.103.215.35
+#   DEPLOY_USER     = root
+#   DEPLOY_PASSWORD = 你的SSH密码
+#   DEPLOY_APP_DIR  = /opt/star-rail-web  (可选)
+
+name: Deploy to Server
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install ssh2
+        run: npm install ssh2
+
+      - name: Deploy via SSH
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
+          DEPLOY_APP_DIR: ${{ secrets.DEPLOY_APP_DIR }}
+        run: node scripts/deploy-remote.mjs

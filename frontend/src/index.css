@@ -1,0 +1,213 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --star-gold: #e8b84a;
+    --star-purple: #7c5cff;
+    --star-cyan: #5eead4;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-star-void text-gray-100 font-sans antialiased overflow-x-hidden;
+    background-image:
+      radial-gradient(ellipse 120% 80% at 50% -30%, rgba(124, 92, 255, 0.12), transparent 50%),
+      radial-gradient(ellipse 80% 50% at 100% 20%, rgba(94, 234, 212, 0.05), transparent 40%),
+      radial-gradient(ellipse 60% 40% at 0% 100%, rgba(232, 184, 74, 0.04), transparent 40%);
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background: rgba(124, 92, 255, 0.4);
+    color: #fff;
+  }
+}
+
+@layer components {
+  /* 星铁风格玻璃面板 */
+  .panel-star {
+    @apply relative rounded-2xl overflow-hidden;
+    background: linear-gradient(145deg, rgba(20, 28, 50, 0.92) 0%, rgba(10, 14, 26, 0.88) 100%);
+    border: 1px solid rgba(232, 184, 74, 0.15);
+    box-shadow: var(--panel-shadow, 0 8px 32px rgba(0, 0, 0, 0.5)), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .panel-star::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(232, 184, 74, 0.5), rgba(124, 92, 255, 0.4), transparent);
+    pointer-events: none;
+  }
+
+  .card {
+    @apply panel-star p-5 transition-all duration-300;
+  }
+
+  .card:hover {
+    border-color: rgba(124, 92, 255, 0.35);
+    box-shadow: 0 12px 40px rgba(124, 92, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .btn-primary {
+    @apply relative px-6 py-2.5 rounded-xl font-semibold text-star-void overflow-hidden transition-all duration-300;
+    background: linear-gradient(135deg, #7c5cff 0%, #6b4ce6 40%, #c9a227 100%);
+    box-shadow: 0 4px 20px rgba(124, 92, 255, 0.4);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 28px rgba(232, 184, 74, 0.35), 0 4px 20px rgba(124, 92, 255, 0.5);
+  }
+
+  .btn-primary:disabled {
+    @apply opacity-60 cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply px-4 py-2 rounded-xl text-gray-300 transition-all duration-200;
+    border: 1px solid transparent;
+  }
+
+  .btn-ghost:hover {
+    @apply text-white bg-white/5;
+    border-color: rgba(124, 92, 255, 0.25);
+  }
+
+  .btn-gold-outline {
+    @apply px-5 py-2 rounded-xl font-medium transition-all duration-300;
+    border: 1px solid rgba(232, 184, 74, 0.4);
+    color: var(--star-gold);
+    background: rgba(232, 184, 74, 0.05);
+  }
+
+  .btn-gold-outline:hover {
+    background: rgba(232, 184, 74, 0.12);
+    box-shadow: 0 0 24px rgba(232, 184, 74, 0.2);
+  }
+
+  .input-star {
+    @apply w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 transition-all duration-300;
+    background: rgba(5, 8, 16, 0.6);
+    border: 1px solid rgba(124, 92, 255, 0.2);
+  }
+
+  .input-star:focus {
+    outline: none;
+    border-color: rgba(232, 184, 74, 0.5);
+    box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.15), 0 0 20px rgba(232, 184, 74, 0.1);
+  }
+
+  .input {
+    @apply input-star;
+  }
+
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #ffd875 0%, #e8b84a 40%, #c9a227 100%);
+  }
+
+  .text-gradient-star {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #5eead4 0%, #7c5cff 50%, #e8b84a 100%);
+  }
+
+  .nav-link {
+    @apply relative px-3 py-2 text-sm text-gray-400 transition-colors duration-200 rounded-lg;
+  }
+
+  .nav-link:hover {
+    @apply text-star-gold-bright;
+  }
+
+  .nav-link.active {
+    @apply text-star-gold;
+  }
+
+  .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--star-gold), transparent);
+    border-radius: 2px;
+  }
+
+  .hero-title {
+    @apply font-display font-bold tracking-wider;
+    text-shadow: 0 0 40px rgba(124, 92, 255, 0.5), 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .article-content h1, .article-content h2, .article-content h3 {
+    @apply text-gradient-gold font-semibold mt-8 mb-4;
+  }
+
+  .article-content p {
+    @apply mb-4 text-gray-300 leading-relaxed;
+  }
+
+  .article-content a {
+    @apply text-star-cyan hover:text-star-gold transition-colors;
+  }
+
+  .article-content ul {
+    @apply list-disc pl-6 mb-4 text-gray-300 space-y-1;
+  }
+
+  .article-content img {
+    @apply rounded-xl max-w-full my-6 border border-white/10;
+  }
+
+  /* 登录页光晕 */
+  .auth-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    animation: float 8s ease-in-out infinite;
+  }
+
+  /* 列车光轨 */
+  .train-trail {
+    position: absolute;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, #7c5cff, #e8b84a, #5eead4, transparent);
+    filter: blur(2px);
+    animation: train-pass 3.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  .intro-stars {
+    background-image:
+      radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.8), transparent),
+      radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.6), transparent),
+      radial-gradient(2px 2px at 130px 80px, rgba(232,184,74,0.6), transparent),
+      radial-gradient(1px 1px at 160px 120px, rgba(255,255,255,0.4), transparent);
+    background-size: 200px 200px;
+    animation: star-drift 60s linear infinite;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(5, 8, 16, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(124, 92, 255, 0.5), rgba(232, 184, 74, 0.3));
+  border-radius: 4px;
+}

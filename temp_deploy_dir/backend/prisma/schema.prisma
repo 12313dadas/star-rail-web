@@ -1,0 +1,240 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum PostType {
+  ARTICLE
+  MOMENT
+  ANNOUNCEMENT
+}
+
+enum CommentTargetType {
+  POST
+  MOMENT
+  GUESTBOOK
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique @db.VarChar(100)
+  email     String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  nickname  String   @db.VarChar(100)
+  avatar    String?  @db.VarChar(500)
+  bio       String?  @db.Text
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts     Post[]
+  moments   Moment[]
+  comments  Comment[]
+  likes     Like[]
+  albums    Album[]
+  guestbook GuestbookMessage[]
+  squads    Squad[]
+}
+
+model Post {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(200)
+  slug        String   @unique @db.VarChar(300)
+  content     String   @db.LongText
+  excerpt     String?  @db.Text
+  coverImage  String?  @db.VarChar(500)
+  type        PostType @default(ARTICLE)
+  published   Boolean  @default(false)
+  viewCount   Int      @default(0)
+  authorId    Int
+  categoryId  Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id])
+  tags     PostTag[]
+  comments Comment[] @relation("PostComments")
+  likes    Like[]    @relation("PostLikes")
+}
+
+model Category {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique @db.VarChar(100)
+  slug        String  @unique @db.VarChar(100)
+  description String? @db.Text
+
+  posts Post[]
+}
+
+model Tag {
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.VarChar(100)
+  slug String @unique @db.VarChar(100)
+
+  posts PostTag[]
+}
+
+model PostTag {
+  postId Int
+  tagId  Int
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+}
+
+model Moment {
+  id         Int      @id @default(autoincrement())
+  content    String   @db.Text
+  images     String?  @db.Text
+  musicUrl   String?  @db.VarChar(500)
+  musicTitle String?  @db.VarChar(200)
+  authorId   Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments Comment[] @relation("MomentComments")
+  likes    Like[]    @relation("MomentLikes")
+}
+
+model Comment {
+  id         Int               @id @default(autoincrement())
+  content    String            @db.Text
+  approved   Boolean           @default(true)
+  authorId   Int?
+  guestName  String?           @db.VarChar(100)
+  guestEmail String?           @db.VarChar(255)
+  parentId   Int?
+  postId     Int?
+  momentId   Int?
+  targetType CommentTargetType
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  author  User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentReplies")
+  post    Post?     @relation("PostComments", fields: [postId], references: [id], onDelete: Cascade)
+  moment  Moment?   @relation("MomentComments", fields: [momentId], references: [id], onDelete: Cascade)
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  guestId   String?  @db.VarChar(200)
+  postId    Int?
+  momentId  Int?
+  createdAt DateTime @default(now())
+
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post   Post?   @relation("PostLikes", fields: [postId], references: [id], onDelete: Cascade)
+  moment Moment? @relation("MomentLikes", fields: [momentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@unique([userId, momentId])
+  @@unique([guestId, postId])
+  @@unique([guestId, momentId])
+}
+
+model Album {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(200)
+  description String?  @db.Text
+  coverImage  String?  @db.VarChar(500)
+  authorId    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  photos Photo[]
+}
+
+model Photo {
+  id        Int      @id @default(autoincrement())
+  url       String   @db.VarChar(500)
+  caption   String?  @db.VarChar(500)
+  albumId   Int
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  album Album @relation(fields: [albumId], references: [id], onDelete: Cascade)
+}
+
+model GuestbookMessage {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text
+  approved  Boolean  @default(true)
+  authorId  Int?
+  guestName String?  @db.VarChar(100)
+  createdAt DateTime @default(now())
+
+  author User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+}
+
+model MusicTrack {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(200)
+  artist    String?  @db.VarChar(200)
+  url       String   @db.VarChar(500)
+  cover     String?  @db.VarChar(500)
+  lyrics    String?  @db.LongText
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSetting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique @db.VarChar(100)
+  value String @db.Text
+}
+
+model Character {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(100)
+  rarity    Int      @default(5)
+  element   String   @db.VarChar(50)
+  path      String   @db.VarChar(50)
+  icon      String?  @db.VarChar(500)
+  preview   String?  @db.VarChar(500)
+  createdAt DateTime @default(now())
+
+  squads1 Squad[] @relation("Character1")
+  squads2 Squad[] @relation("Character2")
+  squads3 Squad[] @relation("Character3")
+  squads4 Squad[] @relation("Character4")
+}
+
+model Squad {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(200)
+  description String?  @db.Text
+  authorId    Int
+  char1Id     Int
+  char2Id     Int
+  char3Id     Int
+  char4Id     Int
+  score       Float    @default(0)
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  char1  Character @relation("Character1", fields: [char1Id], references: [id])
+  char2  Character @relation("Character2", fields: [char2Id], references: [id])
+  char3  Character @relation("Character3", fields: [char3Id], references: [id])
+  char4  Character @relation("Character4", fields: [char4Id], references: [id])
+}

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+uploads/
+.env
+*.log
+.DS_Store
+backend/prisma/dev.db
+backend/prisma/dev.db-journal
+.deploy-bundle.tar.gz
