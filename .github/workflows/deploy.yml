@@ -1,9 +1,12 @@
-# Git push 到 main 分支后自动部署到服务器
-# 在 GitHub 仓库 Settings → Secrets 中添加:
-#   DEPLOY_HOST     = 47.103.215.35
-#   DEPLOY_USER     = root
-#   DEPLOY_PASSWORD = 你的SSH密码
-#   DEPLOY_APP_DIR  = /opt/star-rail-web  (可选)
+# push 到 main/master 后自动部署到阿里云服务器
+#
+# 必需 Secrets (Settings → Secrets and variables → Actions):
+#   DEPLOY_HOST      = 47.103.215.35
+#   DEPLOY_USER      = root
+#   DEPLOY_PASSWORD  = SSH 密码
+#
+# 可选:
+#   DEPLOY_APP_DIR   = /opt/star-rail-web
 
 name: Deploy to Server
 
@@ -15,12 +18,28 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Validate secrets
+        env:
+          DEPLOY_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          if [ -z "$DEPLOY_PASSWORD" ]; then
+            echo "::error::请在 GitHub Secrets 中配置 DEPLOY_PASSWORD"
+            exit 1
+          fi
+          if [ -z "$DEPLOY_HOST" ]; then
+            echo "::warning::DEPLOY_HOST 未配置，将使用默认 IP 47.103.215.35"
+          fi
+          echo "Secrets 校验通过"
 
       - name: Install ssh2
         run: npm install ssh2
