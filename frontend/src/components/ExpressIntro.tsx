@@ -1,105 +1,130 @@
-import { useEffect, useState } from 'react';
-import { Train } from 'lucide-react';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import CinematicCanvas from './intro/CinematicCanvas';
+import IntroHUD from './intro/IntroHUD';
+import { phaseFromProgress } from './intro/cinematicTypes';
 
 interface Props {
   onComplete: () => void;
   nickname?: string;
 }
 
+const DURATION_MS = 8800;
+const SKIP_FADE_MS = 700;
+
 export default function ExpressIntro({ onComplete, nickname }: Props) {
-  const [phase, setPhase] = useState<'train' | 'text' | 'done'>('train');
+  const [progress, setProgress] = useState(0);
+  const [phase, setPhase] = useState(() => phaseFromProgress(0));
+  const [screenOut, setScreenOut] = useState(false);
+  const startRef = useRef(0);
+  const doneRef = useRef(false);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
+  const finish = useCallback(() => {
+    if (doneRef.current) return;
+    doneRef.current = true;
+    setScreenOut(true);
+    setTimeout(() => onCompleteRef.current(), SKIP_FADE_MS);
+  }, []);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase('text'), 2200);
-    const t2 = setTimeout(() => {
-      setPhase('done');
-      onComplete();
-    }, 4200);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
+    startRef.current = performance.now();
+    let raf = 0;
+
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - startRef.current) / DURATION_MS);
+      setProgress(t);
+      setPhase(phaseFromProgress(t));
+
+      if (t >= 0.96) {
+        finish();
+        return;
+      }
+      raf = requestAnimationFrame(tick);
     };
-  }, [onComplete]);
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [finish]);
+
+  const showTitle =
+    phase === 'cinema' && progress > 0.32 && progress < 0.62;
+  const titleOpacity = Math.min(1, Math.max(0, (progress - 0.32) / 0.08) * (1 - (progress - 0.54) / 0.08));
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-star-void transition-opacity duration-1000 ${
-        phase === 'done' ? 'opacity-0 pointer-events-none' : 'opacity-100'
+      className={`fixed inset-0 z-[100] overflow-hidden bg-[#030508] transition-opacity duration-700 ${
+        screenOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
-      <StarfieldIntro />
+      <CinematicCanvas progress={progress} />
 
-      {/* 跃迁光轨 */}
+      {/* Film grain + vignette */}
       <div
-        className="absolute top-1/2 left-0 w-full h-1 -translate-y-1/2 train-trail opacity-80"
-        style={{ animationDelay: '0.2s' }}
+        className="absolute inset-0 pointer-events-none z-[1] intro-film-grain"
+        aria-hidden
       />
       <div
-        className="absolute top-[48%] left-0 w-full h-px bg-gradient-to-r from-transparent via-star-cyan/60 to-transparent"
-        style={{ animation: 'train-pass 3s ease-out forwards', animationDelay: '0.1s' }}
+        className="absolute inset-0 pointer-events-none z-[1]"
+        style={{
+          background:
+            'radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.7) 100%)',
+        }}
       />
 
-      {/* 星穹列车 */}
+      {/* Game-style title overlay during cinema */}
       <div
-        className="absolute top-1/2 -translate-y-1/2 flex items-center gap-4 animate-train-pass z-10"
-        style={{ filter: 'drop-shadow(0 0 40px rgba(124, 92, 255, 0.8)) drop-shadow(0 0 80px rgba(232, 184, 74, 0.4))' }}
+        className="absolute inset-0 z-[15] flex items-center justify-center pointer-events-none transition-opacity duration-500"
+        style={{ opacity: showTitle ? titleOpacity : 0 }}
       >
-        <div className="relative">
-          <div className="absolute -inset-8 bg-star-purple/30 rounded-full blur-3xl" />
-          <div className="relative flex items-center gap-3 px-8 py-4 rounded-2xl border border-star-gold/40 bg-star-panel/90 backdrop-blur-md">
-            <Train className="w-12 h-12 text-star-gold-bright" strokeWidth={1.5} />
-            <div className="hidden sm:block">
-              <p className="font-display text-xs text-star-cyan tracking-[0.3em] uppercase">Astral Express</p>
-              <p className="font-display text-lg text-gradient-gold tracking-wider">星穹列车</p>
-            </div>
-          </div>
+        <div className="text-center">
+          <p className="text-white/80 text-sm tracking-[0.6em] mb-2 font-sans">崩坏</p>
+          <h1
+            className="font-display font-bold text-4xl sm:text-6xl md:text-7xl tracking-[0.2em] text-white"
+            style={{
+              textShadow:
+                '0 0 60px rgba(124,92,255,0.6), 0 0 120px rgba(255,216,117,0.3), 0 4px 20px rgba(0,0,0,0.8)',
+            }}
+          >
+            星穹铁道
+          </h1>
+          <div className="mx-auto mt-4 w-48 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
         </div>
       </div>
 
-      {/* 欢迎文案 */}
+      <IntroHUD phase={phase} progress={progress} nickname={nickname} />
+
+      {/* Corner brand during early phases */}
       <div
-        className={`absolute bottom-[20%] left-0 right-0 text-center transition-all duration-700 z-20 ${
-          phase === 'text' || phase === 'done' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        className={`absolute top-8 left-8 z-20 transition-all duration-700 ${
+          phase === 'logo' || phase === 'warp' ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        <p className="font-display text-star-cyan text-sm tracking-[0.4em] mb-3 uppercase">Welcome Aboard</p>
-        <h1 className="hero-title text-3xl sm:text-4xl text-gradient-gold mb-2">
+        <p className="font-display text-[10px] text-star-cyan tracking-[0.5em] uppercase mb-1">
+          Astral Express
+        </p>
+        <p className="font-display text-sm text-gradient-gold tracking-[0.35em]">WARP DRIVE</p>
+      </div>
+
+      {/* Final welcome (after lore, before flash) */}
+      <div
+        className={`absolute bottom-[18%] left-0 right-0 text-center z-20 px-4 transition-all duration-700 ${
+          phase === 'lore' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'
+        }`}
+      >
+        <h2 className="hero-title text-2xl sm:text-4xl text-gradient-gold mb-2">
           {nickname ? `${nickname}，欢迎登车` : '欢迎登上星穹列车'}
-        </h1>
-        <p className="text-gray-400 text-sm">正在跃迁进入个人空间…</p>
-        <div className="mt-6 mx-auto w-48 h-0.5 bg-gold-line rounded-full opacity-60" />
+        </h2>
+        <p className="text-gray-400/90 text-sm tracking-[0.2em]">个人空间接入完成</p>
       </div>
 
       <button
         type="button"
-        onClick={() => {
-          setPhase('done');
-          onComplete();
-        }}
-        className="absolute bottom-8 right-8 z-30 btn-ghost text-xs text-gray-500 hover:text-star-gold"
+        onClick={finish}
+        className="absolute bottom-6 right-6 z-40 px-4 py-2 rounded-lg text-xs text-gray-500 border border-white/10 hover:border-star-gold/40 hover:text-star-gold transition-all backdrop-blur-md bg-black/30"
       >
-        跳过动画 →
+        跳过动画
       </button>
-    </div>
-  );
-}
-
-function StarfieldIntro() {
-  return (
-    <div className="absolute inset-0">
-      {Array.from({ length: 60 }).map((_, i) => (
-        <span
-          key={i}
-          className="absolute w-px h-px bg-white rounded-full"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            opacity: 0.3 + Math.random() * 0.7,
-            animation: `pulse ${1 + Math.random() * 2}s ease-in-out infinite`,
-            animationDelay: `${Math.random() * 2}s`,
-          }}
-        />
-      ))}
     </div>
   );
 }

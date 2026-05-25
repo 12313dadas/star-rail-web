@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useMusic } from '../contexts/MusicContext';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,6 +10,8 @@ import type { Post, Moment, Comment, User, MusicTrack } from '../types';
 
 export default function AdminPage() {
   const { user } = useAuth();
+  const { refreshTracks } = useMusic();
+  const [syncingMusic, setSyncingMusic] = useState(false);
   const [tab, setTab] = useState<'posts' | 'moments' | 'comments' | 'users' | 'music'>('posts');
   const [posts, setPosts] = useState<Post[]>([]);
   const [moments, setMoments] = useState<Moment[]>([]);
@@ -68,6 +71,20 @@ export default function AdminPage() {
   const toggleRole = async (id: number, role: 'USER' | 'ADMIN') => {
     await api.patch(`/users/${id}/role`, { role });
     setUsers((u) => u.map((x) => x.id === id ? { ...x, role } : x));
+  };
+
+  const syncMusic = async () => {
+    setSyncingMusic(true);
+    try {
+      const res = await api.post<{ synced: number }>('/music/sync-local');
+      await refreshTracks();
+      reloadData();
+      alert(`已同步 ${res.synced} 首歌曲到播放器`);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '同步失败');
+    } finally {
+      setSyncingMusic(false);
+    }
   };
 
   return (
@@ -156,13 +173,28 @@ export default function AdminPage() {
           )}
           {tab === 'music' && (
             <div className="space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <p className="text-sm text-gray-400">共 {tracks.length} 首 · 来源：项目根目录 music/</p>
+                <button
+                  type="button"
+                  onClick={syncMusic}
+                  disabled={syncingMusic}
+                  className="btn-primary text-sm py-1.5"
+                >
+                  {syncingMusic ? '同步中…' : '从 music/ 同步到播放器'}
+                </button>
+              </div>
               {tracks.map((t) => (
-                <div key={t.id} className="flex justify-between py-2 border-b border-white/5">
-                  <span>{t.title} - {t.artist}</span>
-                  <span className={t.active ? 'text-green-400' : 'text-gray-500'}>{t.active ? '启用' : '禁用'}</span>
+                <div key={t.id} className="flex justify-between py-2 border-b border-white/5 gap-4">
+                  <span className="truncate">{t.artist} — {t.title}</span>
+                  <span className={t.active ? 'text-green-400 shrink-0' : 'text-gray-500 shrink-0'}>
+                    {t.active ? '启用' : '禁用'}
+                  </span>
                 </div>
               ))}
-              <p className="text-xs text-gray-500 mt-4">将音频放入项目根目录 music/ 文件夹，运行 npm run music:sync 同步</p>
+              <p className="text-xs text-gray-500 mt-4">
+                新增歌曲：放入 music/ 后点击上方按钮，或运行 npm run music:sync。本地开发时后端启动也会自动同步。
+              </p>
             </div>
           )}
         </div>

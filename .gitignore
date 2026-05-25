@@ -7,3 +7,9 @@ uploads/
 backend/prisma/dev.db
 backend/prisma/dev.db-journal
 .deploy-bundle.tar.gz
+vedio/frames/
+# 本地音乐文件较大，不纳入 Git；部署后放服务器 music/ 并 npm run music:sync
+music/*.flac
+music/*.mp3
+music/*.wav
+music/*.m4a

@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import ExpressIntroGate from './components/ExpressIntroGate';
+import { MusicProvider } from './contexts/MusicContext';
 import MusicPlayer from './components/MusicPlayer';
 import HomePage from './pages/HomePage';
 import PostsPage from './pages/PostsPage';
@@ -41,12 +42,12 @@ function MainShell() {
 
 export default function App() {
   return (
-    <>
+    <MusicProvider>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/*" element={<MainShell />} />
       </Routes>
       <MusicPlayer />
-    </>
+    </MusicProvider>
   );
 }

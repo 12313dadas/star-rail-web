@@ -32,10 +32,9 @@ export default function CommentSection({ targetType, targetId }: Props) {
       await api.post('/comments', {
         content,
         targetType,
-        postId: targetType === 'POST' ? targetId : undefined,
-        momentId: targetType === 'MOMENT' ? targetId : undefined,
-        parentId: replyTo,
-        guestName: user ? undefined : guestName,
+        ...(targetType === 'POST' ? { postId: targetId } : { momentId: targetId }),
+        ...(replyTo != null ? { parentId: replyTo } : {}),
+        ...(!user && guestName.trim() ? { guestName: guestName.trim() } : {}),
       });
       setContent('');
       setReplyTo(null);

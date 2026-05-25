@@ -9,9 +9,9 @@ const router = Router();
 const commentSchema = z.object({
   content: z.string().min(1).max(1000),
   targetType: z.enum(['POST', 'MOMENT', 'GUESTBOOK']),
-  postId: z.number().optional(),
-  momentId: z.number().optional(),
-  parentId: z.number().optional(),
+  postId: z.number().nullish(),
+  momentId: z.number().nullish(),
+  parentId: z.number().nullish(),
   guestName: z.string().max(32).optional(),
   guestEmail: z.string().email().optional(),
 });
