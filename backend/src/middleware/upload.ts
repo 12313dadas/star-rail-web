@@ -28,6 +28,17 @@ export const upload = multer({
   },
 });
 
+export const uploadVideo = multer({
+  storage,
+  limits: { fileSize: 80 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowed = /mp4|webm|mov|m4v/;
+    const ext = allowed.test(path.extname(file.originalname).toLowerCase());
+    if (ext || file.mimetype.startsWith('video/')) cb(null, true);
+    else cb(new Error('仅支持 mp4 / webm / mov 视频'));
+  },
+});
+
 export function getUploadUrl(filename: string): string {
   return `/uploads/${filename}`;
 }

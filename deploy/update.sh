@@ -21,10 +21,12 @@ echo "🔨 构建后端..."
 cd ../backend
 npm ci 2>/dev/null || npm install
 cp .env.production .env 2>/dev/null || true
-npx prisma generate
-npx prisma db push
+npx prisma generate --schema prisma/schema.mysql.prisma
+npx prisma db push --schema prisma/schema.mysql.prisma
 npm run build
 npm run music:sync 2>/dev/null || true
+npm run characters:seed 2>/dev/null || true
+npm run characters:cache 2>/dev/null || true
 
 echo "⚙️ 更新 Nginx 配置..."
 cp "$APP_DIR/deploy/nginx.conf" /etc/nginx/conf.d/star-rail.conf 2>/dev/null || \

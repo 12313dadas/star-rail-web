@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { syncLocalMusicToDb } from '../src/services/musicSync.js';
+import { uniqueCharacters } from '../src/data/hsrCharacters.js';
+import { characterAssetUrls } from '../src/services/characterAssets.js';
 
 const prisma = new PrismaClient();
 
@@ -60,6 +62,25 @@ async function main() {
   if (tracks.length) {
     console.log(`🎵 已同步 ${tracks.length} 首本地音乐：${tracks.map((t) => t.title).join('、')}`);
   }
+
+  await prisma.character.deleteMany({});
+  const chars = uniqueCharacters();
+  for (const c of chars) {
+    const assets = characterAssetUrls(c.gameId);
+    await prisma.character.create({
+      data: {
+        gameId: c.gameId,
+        name: c.name,
+        rarity: c.rarity,
+        element: c.element,
+        path: c.path,
+        region: c.region ?? null,
+        icon: assets.icon,
+        preview: assets.preview,
+      },
+    });
+  }
+  console.log(`⚔️ 已导入 ${chars.length} 名角色立绘`);
 
   console.log('✅ Seed completed. Admin: admin / admin123');
 }

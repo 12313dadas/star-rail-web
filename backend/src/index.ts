@@ -5,8 +5,29 @@ import { syncLocalMusicToDb } from './services/musicSync.js';
 
 const PORT = Number(process.env.PORT) || 3001;
 
+async function ensureSquadsSchema() {
+  try {
+    await prisma.character.findFirst({ select: { gameId: true, region: true } });
+    await prisma.squad.findFirst({ select: { scenario: true, videoUrl: true } });
+  } catch (err) {
+    console.error(
+      '\n❌ 数据库结构过旧，阵容 API 会 500。请在 backend 目录执行：\n' +
+        '   npm run db:setup\n',
+    );
+    throw err;
+  }
+}
+
 async function main() {
   await prisma.$connect();
+  await ensureSquadsSchema();
+
+  const charCount = await prisma.character.count();
+  if (charCount === 0) {
+    console.log('⚔️ 角色库为空，正在自动导入…');
+    const { execSync } = await import('child_process');
+    execSync('npm run characters:seed', { stdio: 'inherit', cwd: process.cwd() });
+  }
 
   if (process.env.MUSIC_AUTO_SYNC !== 'false') {
     try {

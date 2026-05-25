@@ -14,7 +14,7 @@ router.get('/', async (req, res, next) => {
     const limit = Number(req.query.limit) || 15;
     const skip = (page - 1) * limit;
 
-    const [posts, moments, announcements] = await Promise.all([
+    const [posts, moments, announcements, postCount, momentCount, squadCount, characterCount] = await Promise.all([
       prisma.post.findMany({
         where: { published: true, type: 'ARTICLE' },
         select: {
@@ -43,6 +43,10 @@ router.get('/', async (req, res, next) => {
         orderBy: { createdAt: 'desc' },
         take: 5,
       }),
+      prisma.post.count({ where: { published: true, type: 'ARTICLE' } }),
+      prisma.moment.count(),
+      prisma.squad.count(),
+      prisma.character.count(),
     ]);
 
     const feed = [
@@ -57,6 +61,12 @@ router.get('/', async (req, res, next) => {
       announcements,
       page,
       hasMore: feed.length === limit,
+      stats: {
+        posts: postCount,
+        moments: momentCount,
+        squads: squadCount,
+        characters: characterCount,
+      },
     });
   } catch (err) {
     next(err);

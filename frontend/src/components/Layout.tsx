@@ -4,18 +4,21 @@ import { Search, Menu, X, LogOut, Settings, User, Train } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import StarfieldBackground from './StarfieldBackground';
 
-const navItems = [
-  { to: '/', label: '动态' },
+const baseNavItems = [
+  { to: '/', label: '首页' },
   { to: '/posts', label: '攻略' },
   { to: '/moments', label: '说说' },
   { to: '/albums', label: '相册' },
   { to: '/squads', label: '阵容' },
   { to: '/guestbook', label: '留言板' },
-  { to: '/profile/1', label: '关于' },
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
+  const navItems = [
+    ...baseNavItems,
+    { to: user ? `/profile/${user.id}` : '/login', label: user ? '我的空间' : '登车' },
+  ];
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -29,12 +32,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isActive = (path: string) =>
     path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
+  const isHome = location.pathname === '/';
+
   return (
     <div className="relative min-h-screen flex flex-col">
-      <StarfieldBackground />
+      <StarfieldBackground dense={!isHome} className={isHome ? 'opacity-70' : undefined} />
 
-      <header className="sticky top-0 z-40 border-b border-star-gold/10">
-        <div className="absolute inset-0 bg-star-void/80 backdrop-blur-xl" />
+      <header
+        className={`sticky top-0 z-40 ${isHome ? 'border-b border-white/[0.04]' : 'border-b border-star-gold/10'}`}
+      >
+        <div
+          className={`absolute inset-0 backdrop-blur-xl ${isHome ? 'bg-star-void/35' : 'bg-star-void/80'}`}
+        />
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gold-line opacity-50" />
 
         <div className="relative max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
@@ -117,7 +126,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         )}
       </header>
 
-      <main className="relative z-10 flex-1 max-w-6xl mx-auto w-full px-4 py-8">{children}</main>
+      <main className={`relative z-10 flex-1 mx-auto w-full px-4 py-8 ${location.pathname === '/' ? 'max-w-[1200px]' : 'max-w-6xl'}`}>{children}</main>
 
       <footer className="relative z-10 border-t border-star-gold/10 mt-auto">
         <div className="absolute top-0 left-0 right-0 h-px bg-gold-line opacity-30" />

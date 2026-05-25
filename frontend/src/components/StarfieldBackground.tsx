@@ -10,7 +10,13 @@ interface Star {
   opacity: number;
 }
 
-export default function StarfieldBackground({ dense = false }: { dense?: boolean }) {
+export default function StarfieldBackground({
+  dense = false,
+  className,
+}: {
+  dense?: boolean;
+  className?: string;
+}) {
   const stars = useMemo<Star[]>(() => {
     const count = dense ? 120 : 80;
     return Array.from({ length: count }, (_, i) => ({
@@ -25,7 +31,7 @@ export default function StarfieldBackground({ dense = false }: { dense?: boolean
   }, [dense]);
 
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0" aria-hidden>
+    <div className={`fixed inset-0 overflow-hidden pointer-events-none z-0 ${className ?? ''}`} aria-hidden>
       <div className="absolute inset-0 bg-star-void" />
       <div
         className="absolute inset-0 opacity-40"

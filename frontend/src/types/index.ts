@@ -83,10 +83,12 @@ export interface MusicTrack {
 
 export interface Character {
   id: number;
+  gameId?: string;
   name: string;
   rarity: number;
   element: string;
   path: string;
+  region?: string | null;
   icon?: string | null;
   preview?: string | null;
 }
@@ -95,6 +97,10 @@ export interface Squad {
   id: number;
   name: string;
   description?: string | null;
+  scenario?: string | null;
+  tags?: string | null;
+  videoUrl?: string | null;
+  videoTitle?: string | null;
   authorId: number;
   author: Author;
   char1Id: number;

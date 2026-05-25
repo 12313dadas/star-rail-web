@@ -7,11 +7,18 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "db:generate": "prisma generate",
-    "db:push": "prisma db push",
+    "db:generate": "prisma generate --schema prisma/schema.sqlite.prisma",
+    "db:push": "prisma db push --schema prisma/schema.sqlite.prisma",
+    "db:push:prod": "prisma db push --schema prisma/schema.mysql.prisma",
+    "db:generate:prod": "prisma generate --schema prisma/schema.mysql.prisma",
+    "db:setup": "prisma db push --schema prisma/schema.sqlite.prisma --skip-generate && prisma generate --schema prisma/schema.sqlite.prisma && npm run characters:seed",
+    "dev:prepare": "tsx scripts/dev-prepare.ts",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
-    "music:sync": "tsx scripts/sync-music.ts"
+    "music:sync": "tsx scripts/sync-music.ts",
+    "characters:seed": "tsx scripts/seed-characters.ts",
+    "characters:cache": "tsx scripts/cache-character-icons.ts",
+    "characters:refresh": "tsx scripts/seed-characters.ts && tsx scripts/cache-character-icons.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",

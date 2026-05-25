@@ -38,12 +38,26 @@ if not exist "%~dp0frontend\node_modules\" (
     popd
 )
 
-echo [1/2] Starting backend...
+echo [0/3] Stopping old dev servers (if any)...
+call "%~dp0scripts\stop-dev.bat"
+
+echo [1/3] Preparing local database...
+pushd "%~dp0backend"
+if not exist "node_modules\.prisma\client\query_engine-windows.dll.node" (
+    echo [INFO] First run: full Prisma setup...
+    call npm run db:setup
+) else (
+    call npm run dev:prepare
+)
+popd
+echo.
+
+echo [2/3] Starting backend...
 start "SR-Backend" cmd /k cd /d "%~dp0backend" ^&^& npm run dev
 
 timeout /t 2 /nobreak >nul
 
-echo [2/2] Starting frontend...
+echo [3/3] Starting frontend...
 start "SR-Frontend" cmd /k cd /d "%~dp0frontend" ^&^& npm run dev
 
 echo.

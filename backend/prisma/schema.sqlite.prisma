@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -26,12 +26,12 @@ enum CommentTargetType {
 
 model User {
   id        Int      @id @default(autoincrement())
-  username  String   @unique @db.VarChar(100)
-  email     String   @unique @db.VarChar(255)
-  password  String   @db.VarChar(255)
-  nickname  String   @db.VarChar(100)
-  avatar    String?  @db.VarChar(500)
-  bio       String?  @db.Text
+  username  String   @unique
+  email     String   @unique
+  password  String
+  nickname  String
+  avatar    String?
+  bio       String?
   role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -47,11 +47,11 @@ model User {
 
 model Post {
   id          Int      @id @default(autoincrement())
-  title       String   @db.VarChar(200)
-  slug        String   @unique @db.VarChar(300)
-  content     String   @db.LongText
-  excerpt     String?  @db.Text
-  coverImage  String?  @db.VarChar(500)
+  title       String
+  slug        String   @unique
+  content     String
+  excerpt     String?
+  coverImage  String?
   type        PostType @default(ARTICLE)
   published   Boolean  @default(false)
   viewCount   Int      @default(0)
@@ -69,17 +69,17 @@ model Post {
 
 model Category {
   id          Int     @id @default(autoincrement())
-  name        String  @unique @db.VarChar(100)
-  slug        String  @unique @db.VarChar(100)
-  description String? @db.Text
+  name        String  @unique
+  slug        String  @unique
+  description String?
 
   posts Post[]
 }
 
 model Tag {
   id   Int    @id @default(autoincrement())
-  name String @unique @db.VarChar(100)
-  slug String @unique @db.VarChar(100)
+  name String @unique
+  slug String @unique
 
   posts PostTag[]
 }
@@ -96,10 +96,10 @@ model PostTag {
 
 model Moment {
   id         Int      @id @default(autoincrement())
-  content    String   @db.Text
-  images     String?  @db.Text
-  musicUrl   String?  @db.VarChar(500)
-  musicTitle String?  @db.VarChar(200)
+  content    String
+  images     String?
+  musicUrl   String?
+  musicTitle String?
   authorId   Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -111,11 +111,11 @@ model Moment {
 
 model Comment {
   id         Int               @id @default(autoincrement())
-  content    String            @db.Text
+  content    String
   approved   Boolean           @default(true)
   authorId   Int?
-  guestName  String?           @db.VarChar(100)
-  guestEmail String?           @db.VarChar(255)
+  guestName  String?
+  guestEmail String?
   parentId   Int?
   postId     Int?
   momentId   Int?
@@ -133,7 +133,7 @@ model Comment {
 model Like {
   id        Int      @id @default(autoincrement())
   userId    Int?
-  guestId   String?  @db.VarChar(200)
+  guestId   String?
   postId    Int?
   momentId  Int?
   createdAt DateTime @default(now())
@@ -150,9 +150,9 @@ model Like {
 
 model Album {
   id          Int      @id @default(autoincrement())
-  title       String   @db.VarChar(200)
-  description String?  @db.Text
-  coverImage  String?  @db.VarChar(500)
+  title       String
+  description String?
+  coverImage  String?
   authorId    Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -163,8 +163,8 @@ model Album {
 
 model Photo {
   id        Int      @id @default(autoincrement())
-  url       String   @db.VarChar(500)
-  caption   String?  @db.VarChar(500)
+  url       String
+  caption   String?
   albumId   Int
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
@@ -174,10 +174,10 @@ model Photo {
 
 model GuestbookMessage {
   id        Int      @id @default(autoincrement())
-  content   String   @db.Text
+  content   String
   approved  Boolean  @default(true)
   authorId  Int?
-  guestName String?  @db.VarChar(100)
+  guestName String?
   createdAt DateTime @default(now())
 
   author User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
@@ -185,11 +185,11 @@ model GuestbookMessage {
 
 model MusicTrack {
   id        Int      @id @default(autoincrement())
-  title     String   @db.VarChar(200)
-  artist    String?  @db.VarChar(200)
-  url       String   @db.VarChar(500)
-  cover     String?  @db.VarChar(500)
-  lyrics    String?  @db.LongText
+  title     String
+  artist    String?
+  url       String
+  cover     String?
+  lyrics    String?
   sortOrder Int      @default(0)
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -198,20 +198,20 @@ model MusicTrack {
 
 model SiteSetting {
   id    Int    @id @default(autoincrement())
-  key   String @unique @db.VarChar(100)
-  value String @db.Text
+  key   String @unique
+  value String
 }
 
 model Character {
   id        Int      @id @default(autoincrement())
-  gameId    String   @unique @db.VarChar(16)
-  name      String   @unique @db.VarChar(100)
+  gameId    String   @unique
+  name      String   @unique
   rarity    Int      @default(5)
-  element   String   @db.VarChar(50)
-  path      String   @db.VarChar(50)
-  region    String?  @db.VarChar(50)
-  icon      String?  @db.VarChar(500)
-  preview   String?  @db.VarChar(500)
+  element   String
+  path      String
+  region    String?
+  icon      String?
+  preview   String?
   createdAt DateTime @default(now())
 
   squads1 Squad[] @relation("Character1")
@@ -222,12 +222,12 @@ model Character {
 
 model Squad {
   id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(200)
-  description String?  @db.Text
-  scenario    String?  @db.VarChar(120)
-  tags        String?  @db.VarChar(300)
-  videoUrl    String?  @db.VarChar(500)
-  videoTitle  String?  @db.VarChar(200)
+  name        String
+  description String?
+  scenario    String?
+  tags        String?
+  videoUrl    String?
+  videoTitle  String?
   authorId    Int
   char1Id     Int
   char2Id     Int
@@ -244,3 +244,4 @@ model Squad {
   char3  Character @relation("Character3", fields: [char3Id], references: [id])
   char4  Character @relation("Character4", fields: [char4Id], references: [id])
 }
+
