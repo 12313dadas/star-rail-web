@@ -22,7 +22,7 @@ cd ../backend
 npm ci 2>/dev/null || npm install
 cp .env.production .env 2>/dev/null || true
 npx prisma generate --schema prisma/schema.mysql.prisma
-npx prisma db push --schema prisma/schema.mysql.prisma
+npx prisma db push --schema prisma/schema.mysql.prisma --accept-data-loss --accept-data-loss
 npm run build
 npm run music:sync 2>/dev/null || true
 npm run characters:seed 2>/dev/null || true
