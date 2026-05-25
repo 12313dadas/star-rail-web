@@ -1,4 +1,4 @@
-import gameIds from './characterGameIds.json';
+import gameIds from './characterGameIds.json' with { type: 'json' };
 
 /** 官网角色编号（BitTopup Wiki 同步），解决 1404/1405 等错位 */
 const BY_NAME = new Map<string, string>();
