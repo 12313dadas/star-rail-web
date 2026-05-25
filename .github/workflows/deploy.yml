@@ -31,4 +31,5 @@ jobs:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
           DEPLOY_APP_DIR: ${{ secrets.DEPLOY_APP_DIR }}
+          TAR_OPTIONS: '--warning=no-file-changed'   # 添加这行，忽略 tar 打包时的文件变化警告
         run: node scripts/deploy-remote.mjs
