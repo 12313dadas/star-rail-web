@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import ProtectedLink from '../auth/ProtectedLink';
+import { isProtectedPath } from '../../contexts/AuthGateContext';
 import { ArrowRight, ArrowUpRight, Sparkles, Compass, Music, Users, BookOpen, Camera, MessageCircle } from 'lucide-react';
 import ParticleConstellation from '../effects/ParticleConstellation';
 import ScrollReveal from '../effects/ScrollReveal';
@@ -76,9 +78,9 @@ export default function HomeLanding({ nickname, profileTo, announcements, featur
                 浏览动态
                 <ArrowRight className="w-4 h-4" />
               </a>
-              <Link to="/posts" className="home-btn home-btn--ghost">
+              <ProtectedLink to="/posts" className="home-btn home-btn--ghost">
                 进入攻略库
-              </Link>
+              </ProtectedLink>
               {profileTo && (
                 <Link to={profileTo} className="home-btn home-btn--ghost">
                   我的空间
@@ -139,14 +141,25 @@ export default function HomeLanding({ nickname, profileTo, announcements, featur
                 maxTilt={6}
                 scale={1.02}
               >
-                <Link to={m.to} className="block no-underline">
-                  <ArrowUpRight className="home-bento-arrow" strokeWidth={1.5} />
-                  <div className="home-bento-icon-wrap">
-                    <m.icon className="home-bento-icon" strokeWidth={1.5} />
-                  </div>
-                  <h3>{m.label}</h3>
-                  <p>{m.desc}</p>
-                </Link>
+                {isProtectedPath(m.to) ? (
+                  <ProtectedLink to={m.to} className="block no-underline">
+                    <ArrowUpRight className="home-bento-arrow" strokeWidth={1.5} />
+                    <div className="home-bento-icon-wrap">
+                      <m.icon className="home-bento-icon" strokeWidth={1.5} />
+                    </div>
+                    <h3>{m.label}</h3>
+                    <p>{m.desc}</p>
+                  </ProtectedLink>
+                ) : (
+                  <Link to={m.to} className="block no-underline">
+                    <ArrowUpRight className="home-bento-arrow" strokeWidth={1.5} />
+                    <div className="home-bento-icon-wrap">
+                      <m.icon className="home-bento-icon" strokeWidth={1.5} />
+                    </div>
+                    <h3>{m.label}</h3>
+                    <p>{m.desc}</p>
+                  </Link>
+                )}
               </TiltCard>
             ))}
           </div>
@@ -188,11 +201,11 @@ export default function HomeLanding({ nickname, profileTo, announcements, featur
                 <ul className="home-announce-list">
                   {announcements.map((a, i) => (
                     <li key={a.id}>
-                      <Link to={`/posts/${a.slug}`} className="home-glass home-announce-row group">
+                      <ProtectedLink to={`/posts/${a.slug}`} className="home-glass home-announce-row group">
                         <span className="home-announce-tag">公告</span>
                         <span className="flex-1 truncate text-gray-200 group-hover:text-white">{a.title}</span>
                         <ArrowUpRight className="w-4 h-4 text-gray-500 shrink-0" strokeWidth={1.5} />
-                      </Link>
+                      </ProtectedLink>
                     </li>
                   ))}
                 </ul>
@@ -212,7 +225,7 @@ function FeaturedCard({ item, large }: { item: FeedItem; large?: boolean }) {
 
   return (
     <TiltCard className={`home-glass home-featured-card group ${large ? 'home-featured-card--lg' : ''}`} maxTilt={4} scale={1.01}>
-      <Link to={href} className="block no-underline">
+      <ProtectedLink to={href} className="block no-underline">
         <div className="home-featured-media">
           {cover ? (
             <img src={cover} alt="" loading="lazy" />
@@ -230,7 +243,7 @@ function FeaturedCard({ item, large }: { item: FeedItem; large?: boolean }) {
             <p className="text-sm text-gray-500 line-clamp-2 mt-1">{item.excerpt}</p>
           )}
         </div>
-      </Link>
+      </ProtectedLink>
     </TiltCard>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import ProtectedLink from '../components/auth/ProtectedLink';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Avatar, formatTime, LoadingSpinner, Skeleton } from '../components/ui';
@@ -79,10 +79,10 @@ export default function HomePage() {
             <p className="home-kicker">Latest</p>
             <h2 className="home-block-title">最新动态</h2>
           </div>
-          <Link to="/moments" className="home-link-more">
+          <ProtectedLink to="/moments" className="home-link-more">
             全部说说
             <ArrowRight className="w-4 h-4" />
-          </Link>
+          </ProtectedLink>
         </div>
 
         {loading && items.length === 0 ? (
@@ -116,7 +116,7 @@ export default function HomePage() {
 
 function PostCard({ item }: { item: FeedItem & { feedType: 'post' } }) {
   return (
-    <Link to={'/posts/' + item.slug} className="home-glass home-feed-item group">
+    <ProtectedLink to={'/posts/' + item.slug} className="home-glass home-feed-item group">
       <div className="flex gap-5">
         {item.coverImage && (
           <div className="w-36 sm:w-44 shrink-0 aspect-[4/3] rounded-lg overflow-hidden bg-white/5">
@@ -132,14 +132,14 @@ function PostCard({ item }: { item: FeedItem & { feedType: 'post' } }) {
           <FeedMeta author={item.author} createdAt={item.createdAt} counts={item._count} />
         </div>
       </div>
-    </Link>
+    </ProtectedLink>
   );
 }
 
 function MomentCard({ item }: { item: FeedItem & { feedType: 'moment' } }) {
   const images = parseImages(item.images);
   return (
-    <Link to={'/moments/' + item.id} className="home-glass home-feed-item group block">
+    <ProtectedLink to={'/moments/' + item.id} className="home-glass home-feed-item group block">
       <FeedMeta author={item.author} createdAt={item.createdAt} counts={item._count} />
       <p className="mt-3 text-gray-200 whitespace-pre-wrap leading-relaxed line-clamp-6">{item.content}</p>
       {images.length > 0 && (
@@ -149,7 +149,7 @@ function MomentCard({ item }: { item: FeedItem & { feedType: 'moment' } }) {
           ))}
         </div>
       )}
-    </Link>
+    </ProtectedLink>
   );
 }
 

@@ -50,7 +50,11 @@ router.get('/', authOptional, async (req: AuthRequest, res, next) => {
 router.post('/', authOptional, async (req: AuthRequest, res, next) => {
   try {
     const data = commentSchema.parse(req.body);
-    const approved = !requireApproval();
+    if ((data.targetType === 'POST' || data.targetType === 'MOMENT') && !req.user) {
+      return res.status(401).json({ error: '请先登录后再评论' });
+    }
+    // 已登录用户评论立即展示；仅访客在开启审核时需等待
+    const approved = req.user ? true : !requireApproval();
 
   const comment = await prisma.comment.create({
       data: {

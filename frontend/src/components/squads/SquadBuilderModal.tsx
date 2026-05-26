@@ -94,7 +94,7 @@ export default function SquadBuilderModal({ onClose, onSuccess }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-      <div className="panel-star w-full max-w-6xl max-h-[92vh] flex flex-col border-star-gold/20 shadow-2xl">
+      <div className="panel-star w-full max-w-6xl h-[min(92vh,900px)] flex flex-col border-star-gold/20 shadow-2xl">
         <div className="p-5 border-b border-white/10 flex justify-between items-center shrink-0">
           <div>
             <h2 className="text-xl font-display text-gradient-gold tracking-wider">编队模拟器</h2>
@@ -105,9 +105,9 @@ export default function SquadBuilderModal({ onClose, onSuccess }: Props) {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5 space-y-6">
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col p-5 gap-5">
           <DragDropContext onDragEnd={onDragEnd}>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 shrink-0">
               {team.map((char, i) => (
                 <Droppable key={`slot-${i}`} droppableId={`slot-${i}`}>
                   {(provided, snapshot) => (
@@ -149,8 +149,8 @@ export default function SquadBuilderModal({ onClose, onSuccess }: Props) {
               ))}
             </div>
 
-            <div className="grid lg:grid-cols-5 gap-6">
-              <div className="lg:col-span-2 space-y-4">
+            <div className="grid lg:grid-cols-5 gap-6 flex-1 min-h-0">
+              <div className="lg:col-span-2 space-y-4 overflow-y-auto min-h-0 pr-1">
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -207,8 +207,8 @@ export default function SquadBuilderModal({ onClose, onSuccess }: Props) {
                 </div>
               </div>
 
-              <div className="lg:col-span-3 flex flex-col rounded-xl border border-white/10 overflow-hidden bg-black/20">
-                <div className="p-3 border-b border-white/10 flex flex-wrap gap-2">
+              <div className="lg:col-span-3 flex flex-col min-h-0 rounded-xl border border-white/10 overflow-hidden bg-black/20">
+                <div className="p-3 border-b border-white/10 flex flex-wrap gap-2 shrink-0">
                   <div className="relative flex-1 min-w-[140px]">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                     <input
@@ -252,7 +252,8 @@ export default function SquadBuilderModal({ onClose, onSuccess }: Props) {
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="p-3 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 overflow-y-auto max-h-[340px]"
+                      className="p-3 flex-1 min-h-0 overflow-y-auto grid gap-2 content-start"
+                      style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(96px, 1fr))' }}
                     >
                       {characters.map((char, index) => {
                         const inTeam = team.some((t) => t?.id === char.id);

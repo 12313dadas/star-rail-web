@@ -15,6 +15,8 @@ import SearchPage from './pages/SearchPage';
 import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
 import SquadsPage from './pages/SquadsPage';
+import RequireAuth from './components/auth/RequireAuth';
+import AuthModal from './components/auth/AuthModal';
 
 function MainShell() {
   return (
@@ -22,13 +24,13 @@ function MainShell() {
       <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/posts" element={<PostsPage />} />
-          <Route path="/posts/:slug" element={<PostDetailPage />} />
-          <Route path="/moments" element={<MomentsPage />} />
-          <Route path="/moments/:id" element={<MomentDetailPage />} />
-          <Route path="/albums" element={<AlbumsPage />} />
-          <Route path="/albums/:id" element={<AlbumDetailPage />} />
-          <Route path="/squads" element={<SquadsPage />} />
+          <Route path="/posts" element={<RequireAuth><PostsPage /></RequireAuth>} />
+          <Route path="/posts/:slug" element={<RequireAuth><PostDetailPage /></RequireAuth>} />
+          <Route path="/moments" element={<RequireAuth><MomentsPage /></RequireAuth>} />
+          <Route path="/moments/:id" element={<RequireAuth><MomentDetailPage /></RequireAuth>} />
+          <Route path="/albums" element={<RequireAuth><AlbumsPage /></RequireAuth>} />
+          <Route path="/albums/:id" element={<RequireAuth><AlbumDetailPage /></RequireAuth>} />
+          <Route path="/squads" element={<RequireAuth><SquadsPage /></RequireAuth>} />
           <Route path="/profile/:id" element={<ProfilePage />} />
           <Route path="/guestbook" element={<GuestbookPage />} />
           <Route path="/search" element={<SearchPage />} />
@@ -36,6 +38,7 @@ function MainShell() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>
+      <AuthModal />
     </ExpressIntroGate>
   );
 }

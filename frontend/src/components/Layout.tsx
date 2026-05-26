@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, type MouseEvent } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, Menu, X, LogOut, Settings, User, Train } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useAuthGate, isProtectedPath } from '../contexts/AuthGateContext';
 import StarfieldBackground from './StarfieldBackground';
+import ConfirmDialog from './ConfirmDialog';
 
 const baseNavItems = [
   { to: '/', label: '首页' },
@@ -15,6 +17,7 @@ const baseNavItems = [
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
+  const { openAuth } = useAuthGate();
   const navItems = [
     ...baseNavItems,
     { to: user ? `/profile/${user.id}` : '/login', label: user ? '我的空间' : '登车' },
@@ -23,6 +26,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQ, setSearchQ] = useState('');
+  const [logoutConfirm, setLogoutConfirm] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +37,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
   const isHome = location.pathname === '/';
+
+  const handleNavClick = (e: MouseEvent<HTMLAnchorElement>, to: string) => {
+    if (to === '/login') {
+      if (!user) {
+        e.preventDefault();
+        openAuth('登录后即可进入个人空间');
+      }
+      return;
+    }
+    if (!user && isProtectedPath(to)) {
+      e.preventDefault();
+      openAuth();
+      setMenuOpen(false);
+    }
+  };
+
+  const confirmLogout = () => {
+    logout();
+    setLogoutConfirm(false);
+    if (isProtectedPath(location.pathname)) {
+      navigate('/');
+    }
+  };
 
   return (
     <div className="relative min-h-screen flex flex-col">
@@ -64,6 +91,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.to}
                 to={item.to}
+                onClick={(e) => handleNavClick(e, item.to)}
                 className={`nav-link ${isActive(item.to) ? 'active' : ''}`}
               >
                 {item.label}
@@ -95,14 +123,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   <User className="w-5 h-5" />
                   <span className="hidden xl:inline text-sm text-gray-300">{user.nickname}</span>
                 </Link>
-                <button onClick={logout} className="btn-ghost p-2.5" title="退出">
+                <button type="button" onClick={() => setLogoutConfirm(true)} className="btn-ghost p-2.5" title="退出">
                   <LogOut className="w-5 h-5" />
                 </button>
               </>
             ) : (
-              <Link to="/login" className="btn-primary text-sm py-2 px-4">
+              <button type="button" onClick={() => openAuth()} className="btn-primary text-sm py-2 px-4">
                 登车
-              </Link>
+              </button>
             )}
             <button type="button" className="lg:hidden btn-ghost p-2.5" onClick={() => setMenuOpen(!menuOpen)}>
               {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -116,7 +144,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.to}
                 to={item.to}
-                onClick={() => setMenuOpen(false)}
+                onClick={(e) => {
+                  handleNavClick(e, item.to);
+                  setMenuOpen(false);
+                }}
                 className={`nav-link ${isActive(item.to) ? 'active' : ''}`}
               >
                 {item.label}
@@ -135,6 +166,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <p className="text-gray-500 text-sm">崩坏：星穹铁道 · 个人内容空间</p>
         </div>
       </footer>
+
+      <ConfirmDialog
+        open={logoutConfirm}
+        title="退出登车"
+        message="确定要退出当前账号吗？退出后将无法浏览攻略、说说、相册与阵容等内容。"
+        confirmLabel="确定退出"
+        cancelLabel="留在此站"
+        danger
+        onConfirm={confirmLogout}
+        onCancel={() => setLogoutConfirm(false)}
+      />
     </div>
   );
 }
